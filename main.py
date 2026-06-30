@@ -140,7 +140,7 @@ st.markdown("""
 # ══════════════════════════════════════════════════════════════════════════════
 # KPIs
 # ══════════════════════════════════════════════════════════════════════════════
-total_jogadores = len(df)
+#total_jogadores = len(df)
 total_selecoes  = df["pais"].nunique()
 idade_media     = round(pd.to_numeric(df["idade"], errors="coerce").mean(), 1)
 total_gols      = int(pd.to_numeric(df["gols_clube"], errors="coerce").fillna(0).sum())
