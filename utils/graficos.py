@@ -10,6 +10,27 @@ import plotly.express as px
 import plotly.graph_objects as go  # NOVO: importamos go para o gráfico radar melhorado
 import pandas as pd
 
+ CORES_PAISES = {
+    "Brasil":     "#009c3b",
+    "Argentina":  "#74acdf",
+    "França":     "#002395",
+    "Portugal":   "#e42518",
+    "Espanha":    "#c60b1e",
+    "Alemanha":   "#000000",
+    "Inglaterra": "#cf081f",
+    "Itália":     "#0066b2",
+    "Holanda":    "#ff6600",
+    "Bélgica":    "#ed2939",
+    "Croácia":    "#d31f31",
+    "Uruguai":    "#5EB6E4",
+    "Marrocos":   "#c1272d",
+}
+
+PALETA = [
+    "#f9c93e", "#2e7d32", "#1565c0", "#e53935",
+    "#8e24aa", "#00838f", "#ef6c00", "#558b2f",
+    "#ad1457", "#00695c", "#283593", "#6d4c41",
+]
 # =============================================================================
 # O QUE É CADA COISA — GLOSSÁRIO RÁPIDO
 # =============================================================================
