@@ -1,15 +1,48 @@
 import streamlit as st
 import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
-
-# 1 - Jogadores por posição
-cat > /mnt/user-data/outputs/graficos.py << 'ENDOFFILE'
-import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go  # NOVO: importamos go para o gráfico radar melhorado
 import pandas as pd
 
+st.markdown("""
+            .kpi-card {
+    background: linear-gradient(135deg, #0d2137 0%, #1a3a2e 100%);
+    border: 1px solid #2e7d32;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25);
+}
+.kpi-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #f9c93e;
+    margin: 4px 0;
+}
+.kpi-label {
+    font-size: 0.85rem;
+    color: #a5d6a7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: transparent;
+    color: #a5d6a7 !important;
+    border-bottom: 2px solid transparent;
+    font-weight: 600;
+}
+.stTabs [aria-selected="true"] {
+    color: #f9c93e !important;
+    border-bottom: 2px solid #f9c93e !important;
+}
+</style>""", unsafe_allow_html=True)
+
+aba1, aba2, aba3, aba4 = st.tabs([
+    "📊 Visão Geral",
+    "🏆 Rankings",
+    "🕹️ Desempenho",
+    "🔍 Jogadores"
+])
  CORES_PAISES = {
     "Brasil":     "#009c3b",
     "Argentina":  "#74acdf",
@@ -56,69 +89,42 @@ PALETA = [
 # 📌 template="plotly_white": tema visual com fundo branco e linhas suaves
 # =============================================================================
 
+ with col_a:
+        dados_pos = (
+            df.groupby("posicao")
+            .size()
+            .reset_index(name="Quantidade")
+            .sort_values("Quantidade", ascending=True)
+        )
+        fig1 = px.bar(
+            dados_pos,
+            x="Quantidade",
+            y="posicao",
+            orientation="h",
+            title="Jogadores por Posição",
+            color="Quantidade",
+            color_continuous_scale=["#1b5e20", "#f9c93e"],
+            text="Quantidade",
+        )
+        fig1.update_traces(textposition="outside")
+        fig1.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            coloraxis_showscale=False,
+            yaxis_title="",
+            xaxis_title="Quantidade de Jogadores",
+            title_font_color="#f9c93e",
+            height=380,
+        )
+        st.plotly_chart(fig1, use_container_width=True)
 
-# =============================================================================
-# GRÁFICO 1 — Jogadores por Posição
-# =============================================================================
-# O QUE MUDOU EM RELAÇÃO AO ORIGINAL:
-#   ✅ Virou gráfico HORIZONTAL (barras na horizontal ficam mais fáceis de ler
-#      quando os nomes são longos, como "Lateral Esquerdo")
-#   ✅ Adicionamos cor fixa verde (#2e7d32) para ficar com cara de Copa
-#   ✅ Adicionamos rótulos (números) do lado de fora de cada barra
-#   ✅ Melhoramos os labels dos eixos (antes não tinha texto explicando)
-#   ✅ Ajustamos o template para plotly_white (visual mais limpo)
-# =============================================================================
-
-def grafico_posicoes(df):
-
-    # Agrupa os dados: conta quantos jogadores existem em cada posição
-    dados = (
-        df.groupby("posicao")
-        .size()
-        .reset_index(name="Quantidade")
-        .sort_values("Quantidade", ascending=True)  # ascending=True: menor embaixo, maior em cima
-    )
-
-    # Cria o gráfico de barras HORIZONTAL (orientation="h")
-    # ANTES era vertical (sem orientation="h"), ficava difícil ler os nomes
-    fig = px.bar(
-        dados,
-        x="Quantidade",          # eixo X: o número de jogadores
-        y="posicao",             # eixo Y: os nomes das posições
-        orientation="h",         # NOVO: "h" = horizontal
-        title="Jogadores por Posição",
-        color_discrete_sequence=["#2e7d32"],  # NOVO: cor verde copa do mundo
-        text="Quantidade",       # NOVO: mostra o número dentro/fora da barra
-        labels={
-            "posicao": "Posição",
-            "Quantidade": "Nº de Jogadores"  # NOVO: label mais descritivo no eixo
-        }
-    )
-
-    # Posiciona os números do lado de fora das barras
-    # ANTES não tinha texto nenhum nas barras
-    fig.update_traces(textposition="outside")
-
-    fig.update_layout(
-        template="plotly_white",   # fundo branco limpo
-        height=400,                # NOVO: altura em pixels (antes usava padrão)
-        yaxis_title="",            # NOVO: remove o título do eixo Y (já é óbvio)
-        xaxis_title="Nº de Jogadores"
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
 
 
 # =============================================================================
 # GRÁFICO 2 — Top 10 Artilheiros
 # =============================================================================
-# O QUE MUDOU EM RELAÇÃO AO ORIGINAL:
-#   ✅ Adicionamos a coluna "pais" como cor — assim cada barra tem a cor
-#      da seleção do jogador, fica mais fácil identificar
-#   ✅ Adicionamos hover_data com "posicao" e "clube" — ao passar o mouse
-#      sobre a barra você vê a posição e o clube do jogador
-#   ✅ Labels melhorados nos eixos
-# =============================================================================
+
 
 def grafico_top_gols(df):
 
