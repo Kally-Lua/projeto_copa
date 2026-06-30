@@ -21,7 +21,7 @@ def grafico_posicoes(df):
         orientation="h",
         color="Quantidade",
         title="Jogadores por Posição",
-        color_discrete_sequence=["#2e7d32"], 
+        color=["#2e7d32"], 
         text="Quantidade",
         labels={"posicao": "Posição", "Quantidade": "Quantidade de Jogadores"}  
     )
