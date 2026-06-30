@@ -2,133 +2,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go  # NOVO: importamos go para o gráfico radar melhorado
 import pandas as pd
-st.set_page_config(
-    page_title="Copa do Mundo Dashboard",
-    page_icon="⚽",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-st.markdown("""
-.stApp { background-color: #0a1628; }
 
-/* menu da lateral */
-section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d2137 0%, #0a3d1f 100%);
-}
-section[data-testid="stSidebar"] * { color: #e8f5e9 !important; }
-
-/* Configuração do layout*/
-h1, h2, h3 { color: #f9c93e !important; }
-p, label, .stMarkdown { color: #e0e0e0 !important; }
-
-/* Configurando os KPIs */
-.kpi-card {
-    background: linear-gradient(135deg, #0d2137 0%, #1a3a2e 100%);
-    border: 1px solid #2e7d32;
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25);
-}
-.kpi-value {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #f9c93e;
-    margin: 4px 0;
-}
-.kpi-label {
-    font-size: 0.85rem;
-    color: #a5d6a7;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.stTabs [data-baseweb="tab"] {
-    background: transparent;
-    color: #a5d6a7 !important;
-    border-bottom: 2px solid transparent;
-    font-weight: 600;
-}
-.stTabs [aria-selected="true"] {
-    color: #f9c93e !important;
-    border-bottom: 2px solid #f9c93e !important;
-}
-</style>""", unsafe_allow_html=True)
-
-aba1, aba2, aba3, aba4 = st.tabs([
-    "📊 Visão Geral",
-    "🏆 Rankings",
-    "🕹️ Desempenho",
-    "🔍 Jogadores"
-])
- CORES_PAISES = {
-    "Brasil":     "#009c3b",
-    "Argentina":  "#74acdf",
-    "França":     "#002395",
-    "Portugal":   "#e42518",
-    "Espanha":    "#c60b1e",
-    "Alemanha":   "#000000",
-    "Inglaterra": "#cf081f",
-    "Itália":     "#0066b2",
-    "Holanda":    "#ff6600",
-    "Bélgica":    "#ed2939",
-    "Croácia":    "#d31f31",
-    "Uruguai":    "#5EB6E4",
-    "Marrocos":   "#c1272d",
-}
-
-PALETA = [
-    "#f9c93e", "#2e7d32", "#1565c0", "#e53935",
-    "#8e24aa", "#00838f", "#ef6c00", "#558b2f",
-    "#ad1457", "#00695c", "#283593", "#6d4c41",
-]
-st.sidebar.markdown("##  Copa do Mundo")
-st.sidebar.markdown("---")
-st.sidebar.markdown("###  Filtros")
-
-# Filtro 1 — Seleção
-paises_disp = sorted(df_raw["pais"].dropna().unique())
-pais_sel = st.sidebar.selectbox(
-    " Seleção",
-    options=["Todas"] + paises_disp,
-    index=0
-)
-
-# Filtro 2 — Posição
-posicoes_disp = sorted(df_raw["posicao"].dropna().unique())
-posicoes_sel = st.sidebar.multiselect(
-    " Posição",
-    options=posicoes_disp,
-    placeholder="Todas as posições"
-)
-
-# Filtro 3 — Faixa etária (bônus)
-idade_min, idade_max = int(df_raw["idade"].min()), int(df_raw["idade"].max())
-faixa_idade = st.sidebar.slider(
-    " Faixa etária",
-    min_value=idade_min,
-    max_value=idade_max,
-    value=(idade_min, idade_max)
-)
-
-st.sidebar.markdown("---")
-st.sidebar.info(" Dados: Copa do Mundo 2022\n\n IFNMG - BD2")
-
-# ── Aplica filtros ──────────────────────────────────────────────────────────
-df = df_raw.copy()
-if pais_sel != "Todas":
-    df = df[df["pais"] == pais_sel]
-if posicoes_sel:
-    df = df[df["posicao"].isin(posicoes_sel)]
-df = df[(df["idade"] >= faixa_idade[0]) & (df["idade"] <= faixa_idade[1])]
-
-# ── Cabeçalho ───────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="dashboard-header">
-    <h1> Copa do Mundo — Análise de Jogadores</h1>
-    <p>Explore estatísticas e desempenho das principais seleções do mundo</p>
-</div>
-""", unsafe_allow_html=True)
 
 # =============================================================================
 # O QUE É CADA COISA — GLOSSÁRIO RÁPIDO
@@ -155,7 +29,24 @@ st.markdown("""
 # 📌 template="plotly_white": tema visual com fundo branco e linhas suaves
 # =============================================================================
 
- with col_a:
+aba1, aba2, aba3, aba4 = st.tabs([
+    "📊 Visão Geral",
+    "🏆 Rankings",
+    "🕹️ Desempenho",
+    "🔍 Jogadores"
+])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ABA 1 — VISÃO GERAL
+# ══════════════════════════════════════════════════════════════════════════════
+with aba1:
+    st.markdown("### Distribuição e Perfil dos Jogadores")
+
+    col_a, col_b = st.columns(2)
+
+    # ── Gráfico 1: Jogadores por Posição ────────────────────────────────────
+    with col_a:
         dados_pos = (
             df.groupby("posicao")
             .size()
@@ -185,14 +76,8 @@ st.markdown("""
         )
         st.plotly_chart(fig1, use_container_width=True)
 
-
-
-# =============================================================================
-# GRÁFICO 2 — Top 10 Artilheiros
-# =============================================================================
-
-
- with col_b:
+    # ── Gráfico 2: Distribuição de Idades ───────────────────────────────────
+    with col_b:
         fig2 = px.histogram(
             df,
             x="idade",
@@ -242,348 +127,442 @@ st.markdown("""
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-# =============================================================================
-# GRÁFICO 3 — Top 10 Assistentes
-# =============================================================================
-# O QUE MUDOU EM RELAÇÃO AO ORIGINAL:
-#   ✅ Mesma melhoria do gráfico de artilheiros: cor por seleção
-#   ✅ hover_data com posição e clube
-#   ✅ Emoji no título para ficar mais visual
-# =============================================================================
-
-def grafico_top_assistencias(df):
-
-    dados = (
-        df.sort_values("assistencias_clube", ascending=False)
-        .head(10)
-    )
-
-    fig = px.bar(
-        dados,
-        x="assistencias_clube",
-        y="nome",
-        orientation="h",
-        title="🎯 Top 10 Maiores Assistentes",
-        text="assistencias_clube",
-        color="pais",            # NOVO: cor por seleção
-        hover_data={             # NOVO: info extra no hover
-            "posicao": True,
-            "clube": True,
-            "pais": False
-        },
-        labels={
-            "assistencias_clube": "Assistências no Clube",
-            "nome": "",
-            "pais": "Seleção"
-        }
-    )
-
-    fig.update_layout(
-        yaxis=dict(categoryorder="total ascending"),
-        template="plotly_white",
-        height=420,
-        legend_title_text="Seleção"
-    )
-
-    fig.update_traces(textposition="outside")
-
-    st.plotly_chart(fig, use_container_width=True)
-
-
-# =============================================================================
-# GRÁFICO 4 — Distribuição das Idades
-# =============================================================================
-# O QUE MUDOU EM RELAÇÃO AO ORIGINAL:
-#   ✅ Adicionamos uma linha vertical marcando a MÉDIA de idade
-#      Isso é chamado de "anotação" — ajuda a interpretar o gráfico
-#   ✅ Melhoramos os labels dos eixos
-#   ✅ Adicionamos o parâmetro barmode="overlay" e opacity para as cores
-#      não ficarem totalmente sólidas e esconderem umas às outras
-# =============================================================================
-
-def grafico_idades(df):
-
-    # Calcula a média de idade para usar como linha de referência
-    # NOVO: antes não tinha esse cálculo
-    media_idade = df["idade"].mean()
-
-    fig = px.histogram(
-        df,
-        x="idade",
-        nbins=10,       # nbins = número de "caixinhas" (faixas) do histograma
-        color="posicao",
-        title="📊 Distribuição dos Jogadores por Faixa Etária",
-        labels={
-            "idade": "Idade",
-            "count": "Quantidade de Jogadores",  # NOVO
-            "posicao": "Posição"                 # NOVO
-        },
-        opacity=0.8     # NOVO: 0.8 = leve transparência para as barras não se sobreporem
-    )
-
-    # NOVO: adiciona uma linha vertical na média de idade
-    # Isso ajuda a visualizar: "a maioria está acima ou abaixo da média?"
-    fig.add_vline(
-        x=media_idade,
-        line_dash="dash",     # linha tracejada
-        line_color="red",
-        annotation_text=f"Média: {media_idade:.1f} anos",  # texto ao lado da linha
-        annotation_position="top right"
-    )
-
-    fig.update_layout(
-        template="plotly_white",
-        height=420,
-        legend_title_text="Posição"  # NOVO
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-
-# =============================================================================
-# GRÁFICO 5 — Clubes com mais jogadores convocados
-# =============================================================================
-# O QUE MUDOU EM RELAÇÃO AO ORIGINAL:
-#   ✅ Adicionamos a cor por quantidade (gradiente de cor)
-#      — quanto mais jogadores, mais escura fica a barra
-#   ✅ Adicionamos os números em cima de cada barra (text="Quantidade")
-#   ✅ Rotacionamos os nomes dos clubes no eixo X para não sobrepor
-#   ✅ Removemos o título do eixo X (já é óbvio que são os clubes)
-# =============================================================================
-
-def grafico_clubes(df):
-
-    dados = (
+    # ── Gráfico 4: Clubes com mais convocados ───────────────────────────────
+    dados_clubes = (
         df.groupby("clube")
         .size()
         .reset_index(name="Quantidade")
         .sort_values("Quantidade", ascending=False)
         .head(10)
     )
-
-    fig = px.bar(
-        dados,
+    fig4 = px.bar(
+        dados_clubes,
         x="clube",
         y="Quantidade",
-        color="Quantidade",   # cor varia conforme o valor (gradiente)
-        title="🏟️ Top 10 Clubes com Mais Jogadores Convocados",
-        text="Quantidade",    # NOVO: número em cima de cada barra
-        color_continuous_scale="Greens",  # NOVO: escala de verde (do claro ao escuro)
-        labels={
-            "clube": "",
-            "Quantidade": "Nº de Jogadores"
-        }
-    )
-
-    fig.update_traces(textposition="outside")  # NOVO: número fora das barras
-
-    fig.update_layout(
-        template="plotly_white",
-        height=420,
-        coloraxis_showscale=False,  # NOVO: esconde a barrinha de escala de cor
-        xaxis_tickangle=-35         # NOVO: inclina os nomes dos clubes 35 graus
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-
-# =============================================================================
-# GRÁFICO 6 — Desempenho Médio da Seleção (Radar)
-# =============================================================================
-# O QUE MUDOU EM RELAÇÃO AO ORIGINAL:
-#   ✅ Trocamos px.line_polar por go.Scatterpolar — dá mais controle visual
-#   ✅ Adicionamos o preenchimento (fill) com opacidade, ficou mais bonito
-#   ✅ O gráfico agora mostra os VALORES de cada atributo dentro do radar
-#   ✅ Melhoramos as cores e o visual geral
-# =============================================================================
-
-def grafico_desempenho_selecao(df):
-
-    # st.selectbox = caixinha de seleção (dropdown) onde o usuário escolhe uma opção
-    selecao = st.selectbox(
-        "Selecione uma seleção para ver o desempenho:",
-        sorted(df["pais"].unique()),
-        key="desempenho_selecao",
-    )
-
-    # Filtra só os jogadores daquela seleção
-    dados = df[df["pais"] == selecao]
-
-    # Calcula a MÉDIA de cada atributo para a seleção escolhida
-    # .mean() = calcula a média de todos os valores daquela coluna
-    nomes_atributos = ["Ritmo", "Finalização", "Passe", "Drible", "Defesa", "Físico"]
-    valores = [
-        dados["ritmo"].mean(),
-        dados["finalizacao"].mean(),
-        dados["passe"].mean(),
-        dados["drible"].mean(),
-        dados["defesa"].mean(),
-        dados["fisico"].mean(),
-    ]
-
-    # NOVO: usamos go.Figure com go.Scatterpolar no lugar de px.line_polar
-    # Scatterpolar = gráfico em formato de "teia de aranha" (radar)
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatterpolar(
-        r=valores,                  # r = os valores de cada atributo
-        theta=nomes_atributos,      # theta = os nomes que aparecem nas pontas
-        fill="toself",              # preenche a área dentro do radar
-        fillcolor="rgba(46,125,50,0.3)",  # NOVO: cor verde com transparência (0.3)
-        line_color="#2e7d32",       # NOVO: cor da borda do radar
-        name=selecao,
-    ))
-
-    fig.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 100]   # NOVO: define que a escala vai de 0 a 100
-            )
-        ),
-        title=f"🕸️ Desempenho Médio — {selecao}",
-        height=450,
-        showlegend=False,
-        template="plotly_white"
-    )
-
-    st.plotly_chart(fig, use_container_width=True, key="grafico_desempenho_selecao")
-
-
-# =============================================================================
-# GRÁFICO 7 — Média de Gols por Posição
-# =============================================================================
-# O QUE MUDOU EM RELAÇÃO AO ORIGINAL:
-#   ✅ Adicionamos gradiente de cor (quanto mais gols, mais escuro)
-#   ✅ Melhoramos o formato do número: de "1.234567" para "1.2"
-#   ✅ Adicionamos um título mais visual com emoji
-# =============================================================================
-
-def grafico_media_gols_posicao(df):
-
-    dados = (
-        df.groupby("posicao")["gols_clube"]
-        .mean()
-        .reset_index()
-        .sort_values("gols_clube", ascending=True)
-    )
-
-    fig = px.bar(
-        dados,
-        x="gols_clube",
-        y="posicao",
-        orientation="h",
-        text="gols_clube",
-        title="⚽ Média de Gols por Posição",
-        color="gols_clube",                    # NOVO: cor varia pelo valor
-        color_continuous_scale="Greens",       # NOVO: escala de cor verde
-        labels={
-            "gols_clube": "Média de Gols",
-            "posicao": "Posição"
-        }
-    )
-
-    fig.update_traces(
-        texttemplate="%{text:.1f}",  # ".1f" = mostra só 1 casa decimal
-        textposition="outside"
-    )
-
-    fig.update_layout(
-        template="plotly_white",
-        height=420,
-        showlegend=False,
-        coloraxis_showscale=False,  # NOVO: esconde a barrinha de cor (não precisa)
-        yaxis=dict(categoryorder="total ascending")
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-        key="grafico_media_gols_posicao"
-    )
-
-def grafico_posicoes(df):
-
-    dados = (
-        df.groupby("posicao")
-        .size()
-        .reset_index(name="Quantidade")
-        .sort_values("Quantidade", ascending=True)
-    )
-
-    fig = px.bar(
-        dados,
-        x="Quantidade",
-        y="posicao",
-        orientation="h",
+        title="Top 10 Clubes com Mais Jogadores Convocados",
         color="Quantidade",
-        title="Jogadores por Posição",
-        color=["#2e7d32"], 
+        color_continuous_scale=["#1b5e20", "#f9c93e"],
         text="Quantidade",
-        labels={"posicao": "Posição", "Quantidade": "Quantidade de Jogadores"}  
     )
-    #adicionei essa funcionalidade para que os números fiquem fora da barra e 
-    fig.update_traces(textposition="outside")
-    #E essa abaixo é para configurar o layout do gráfico, como altura e títulos dos eixos
-    fig.update_layout(
-        template="plotly_white",
-        yaxis_title="Posição",
-        xaxis_title="Quantidade de Jogadores"
+    fig4.update_traces(textposition="outside")
+    fig4.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        coloraxis_showscale=False,
+        title_font_color="#f9c93e",
+        xaxis_title="",
+        height=380,
     )
+    st.plotly_chart(fig4, use_container_width=True)
 
-    st.plotly_chart(fig, use_container_width=True)
 
-# 2 - Top 10 Artilheiros
-def grafico_top_gols(df):
+# ══════════════════════════════════════════════════════════════════════════════
+# ABA 2 — RANKINGS
+# ══════════════════════════════════════════════════════════════════════════════
+with aba2:
+    st.markdown("### Rankings de Desempenho Individual")
 
-    dados = (
-        df.sort_values("gols_clube", ascending=False)
-        .head(10)
+    col_r1, col_r2 = st.columns(2)
+
+    # ── Gráfico 5: Top 10 Artilheiros ───────────────────────────────────────
+    with col_r1:
+        top_gols = (
+            df.sort_values("gols_clube", ascending=False)
+            .head(10)
+        )
+        fig5 = px.bar(
+            top_gols,
+            x="gols_clube",
+            y="nome",
+            orientation="h",
+            title="🥇 Top 10 Artilheiros",
+            color="pais",
+            color_discrete_map=CORES_PAISES,
+            text="gols_clube",
+            labels={"gols_clube": "Gols", "nome": "", "pais": "Seleção"},
+        )
+        fig5.update_traces(textposition="outside")
+        fig5.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(categoryorder="total ascending"),
+            title_font_color="#f9c93e",
+            height=400,
+            showlegend=True,
+            legend_title_text="Seleção",
+        )
+        st.plotly_chart(fig5, use_container_width=True)
+
+    # ── Gráfico 6: Top 10 Assistentes ───────────────────────────────────────
+    with col_r2:
+        top_ass = (
+            df.sort_values("assistencias_clube", ascending=False)
+            .head(10)
+        )
+        fig6 = px.bar(
+            top_ass,
+            x="assistencias_clube",
+            y="nome",
+            orientation="h",
+            title="🎯 Top 10 Assistentes",
+            color="pais",
+            color_discrete_map=CORES_PAISES,
+            text="assistencias_clube",
+            labels={"assistencias_clube": "Assistências", "nome": "", "pais": "Seleção"},
+        )
+        fig6.update_traces(textposition="outside")
+        fig6.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(categoryorder="total ascending"),
+            title_font_color="#f9c93e",
+            height=400,
+            showlegend=True,
+            legend_title_text="Seleção",
+        )
+        st.plotly_chart(fig6, use_container_width=True)
+
+    # ── Gráfico 7: Média de Gols por Posição ────────────────────────────────
+    st.markdown("---")
+    col_r3, col_r4 = st.columns(2)
+
+    with col_r3:
+        media_gols_pos = (
+            df.groupby("posicao")["gols_clube"]
+            .mean()
+            .reset_index()
+            .sort_values("gols_clube", ascending=True)
+        )
+        fig7 = px.bar(
+            media_gols_pos,
+            x="gols_clube",
+            y="posicao",
+            orientation="h",
+            title="Média de Gols por Posição",
+            color="gols_clube",
+            color_continuous_scale=["#1b5e20", "#f9c93e"],
+            text="gols_clube",
+            labels={"gols_clube": "Média de Gols", "posicao": ""},
+        )
+        fig7.update_traces(texttemplate="%{text:.1f}", textposition="outside")
+        fig7.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            coloraxis_showscale=False,
+            title_font_color="#f9c93e",
+            height=380,
+        )
+        st.plotly_chart(fig7, use_container_width=True)
+
+    # ── Gráfico 8: Scatter Gols x Assistências ──────────────────────────────
+    with col_r4:
+        fig8 = px.scatter(
+            df,
+            x="gols_clube",
+            y="assistencias_clube",
+            color="pais",
+            size="partidas_clube",
+            hover_name="nome",
+            hover_data={"posicao": True, "clube": True},
+            title="Gols vs Assistências (tamanho = partidas)",
+            color_discrete_map=CORES_PAISES,
+            labels={
+                "gols_clube": "Gols no Clube",
+                "assistencias_clube": "Assistências no Clube",
+                "pais": "Seleção",
+            },
+        )
+        fig8.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_font_color="#f9c93e",
+            height=380,
+            legend_title_text="Seleção",
+        )
+        st.plotly_chart(fig8, use_container_width=True)
+
+    # ── Gráfico 9: Copas do mundo por jogador (top 10) ───────────────────────
+    st.markdown("---")
+    top_copas = (
+        df.sort_values("num_copas", ascending=False)
+        .head(12)[["nome", "pais", "num_copas", "idade"]]
     )
-
-    fig = px.bar(
-        dados,
-        x="gols_clube",
-        y="nome",
-        orientation="h",
-        title="Ranking dos 10 Maiores Artilheiros",
-        text="gols_clube", color="pais", hover_data={ "posicao":True, "clube":True, "pais":False}, labels={ "gols_clube": "Gols no Clube", "nome": "", "pais": "Seleção" }
+    fig9 = px.bar(
+        top_copas,
+        x="nome",
+        y="num_copas",
+        color="pais",
+        color_discrete_map=CORES_PAISES,
+        title="🌍 Jogadores com Mais Copas do Mundo Disputadas",
+        text="num_copas",
+        labels={"nome": "", "num_copas": "Nº de Copas", "pais": "Seleção"},
     )
-    
-
-    fig.update_layout(
-        yaxis=dict(categoryorder="total ascending"),
-        showlegend=False
+    fig9.update_traces(textposition="outside")
+    fig9.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        title_font_color="#f9c93e",
+        height=380,
+        legend_title_text="Seleção",
     )
+    st.plotly_chart(fig9, use_container_width=True)
 
-    fig.update_traces(
-        textposition="outside"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ABA 3 — DESEMPENHO (Radar + Heatmap)
+# ══════════════════════════════════════════════════════════════════════════════
+with aba3:
+    st.markdown("### Análise de Desempenho das Seleções")
+
+    col_d1, col_d2 = st.columns([1, 1])
+
+    # ── Gráfico 10: Radar de Atributos por Seleção ──────────────────────────
+    with col_d1:
+        st.markdown("#### 🕸️ Radar de Atributos")
+        selecao_radar = st.selectbox(
+            "Selecione a seleção para o radar:",
+            sorted(df_raw["pais"].unique()),
+            key="sel_radar"
+        )
+        dados_radar = df_raw[df_raw["pais"] == selecao_radar]
+        atributos = {
+            "Ritmo":      dados_radar["ritmo"].mean(),
+            "Finalização":dados_radar["finalizacao"].mean(),
+            "Passe":      dados_radar["passe"].mean(),
+            "Drible":     dados_radar["drible"].mean(),
+            "Defesa":     dados_radar["defesa"].mean(),
+            "Físico":     dados_radar["fisico"].mean(),
+        }
+        fig10 = go.Figure(go.Scatterpolar(
+            r=list(atributos.values()),
+            theta=list(atributos.keys()),
+            fill="toself",
+            name=selecao_radar,
+            line_color=CORES_PAISES.get(selecao_radar, "#f9c93e"),
+            fillcolor=CORES_PAISES.get(selecao_radar, "#f9c93e"),
+            opacity=0.4,
+        ))
+        fig10.update_layout(
+            polar=dict(
+                bgcolor="rgba(0,0,0,0)",
+                radialaxis=dict(
+                    visible=True, range=[0, 100],
+                    color="#a5d6a7", gridcolor="#2e7d32"
+                ),
+                angularaxis=dict(color="#f9c93e"),
+            ),
+            paper_bgcolor="rgba(0,0,0,0)",
+            title=f"Desempenho Médio — {selecao_radar}",
+            title_font_color="#f9c93e",
+            height=420,
+            showlegend=False,
+        )
+        st.plotly_chart(fig10, use_container_width=True)
+
+    # ── Gráfico 11: Comparativo de Atributos entre Seleções ─────────────────
+    with col_d2:
+        st.markdown("#### ⚡ Comparar Duas Seleções")
+        paises_lista = sorted(df_raw["pais"].unique())
+        s1 = st.selectbox("Seleção 1:", paises_lista, index=0, key="s1")
+        s2 = st.selectbox("Seleção 2:", paises_lista, index=1, key="s2")
+
+        atribs = ["ritmo", "finalizacao", "passe", "drible", "defesa", "fisico"]
+        labels_atribs = ["Ritmo", "Finalização", "Passe", "Drible", "Defesa", "Físico"]
+
+        med1 = df_raw[df_raw["pais"] == s1][atribs].mean().tolist()
+        med2 = df_raw[df_raw["pais"] == s2][atribs].mean().tolist()
+
+        fig11 = go.Figure()
+        fig11.add_trace(go.Scatterpolar(
+            r=med1 + [med1[0]],
+            theta=labels_atribs + [labels_atribs[0]],
+            fill="toself",
+            name=s1,
+            line_color=CORES_PAISES.get(s1, "#f9c93e"),
+            opacity=0.5,
+        ))
+        fig11.add_trace(go.Scatterpolar(
+            r=med2 + [med2[0]],
+            theta=labels_atribs + [labels_atribs[0]],
+            fill="toself",
+            name=s2,
+            line_color=CORES_PAISES.get(s2, "#1565c0"),
+            opacity=0.5,
+        ))
+        fig11.update_layout(
+            polar=dict(
+                bgcolor="rgba(0,0,0,0)",
+                radialaxis=dict(
+                    visible=True, range=[0, 100],
+                    color="#a5d6a7", gridcolor="#2e7d32"
+                ),
+                angularaxis=dict(color="#f9c93e"),
+            ),
+            paper_bgcolor="rgba(0,0,0,0)",
+            title=f"{s1}  vs  {s2}",
+            title_font_color="#f9c93e",
+            height=420,
+            legend=dict(font=dict(color="#e0e0e0")),
+        )
+        st.plotly_chart(fig11, use_container_width=True)
+
+    # ── Gráfico 12: Heatmap de Atributos Médios por Seleção ─────────────────
+    st.markdown("---")
+    st.markdown("#### 🔥 Heatmap de Atributos por Seleção")
+
+    pivot = (
+        df_raw.groupby("pais")[atribs]
+        .mean()
+        .rename(columns={
+            "ritmo": "Ritmo", "finalizacao": "Finalização",
+            "passe": "Passe", "drible": "Drible",
+            "defesa": "Defesa", "fisico": "Físico"
+        })
     )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-# 3 - Top Assistências
-
-def grafico_top_assistencias(df):
-
-    dados = (
-        df.sort_values("assistencias_clube", ascending=False)
-        .head(10)
+    fig12 = px.imshow(
+        pivot,
+        text_auto=".1f",
+        color_continuous_scale="YlGn",
+        aspect="auto",
+        title="Média de Atributos por Seleção",
+        labels={"color": "Valor"},
     )
-
-    fig = px.bar(
-        dados,
-        x="assistencias_clube",
-        y="nome",
-        orientation="h",
-        title="Ranking dos 10 Maiores Assistentes",
-        text="assistencias_clube"
+    fig12.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        title_font_color="#f9c93e",
+        font_color="#e0e0e0",
+        height=420,
+        xaxis_title="",
+        yaxis_title="",
     )
+    st.plotly_chart(fig12, use_container_width=True)
 
-    fig.update_layout(
-        yaxis=dict(categoryorder="total ascending"),
-        showlegend=False
-    )
 
-    fig.update_traces(
-        textposition="outside
+# ══════════════════════════════════════════════════════════════════════════════
+# ABA 4 — JOGADORES (cards individuais)
+# ══════════════════════════════════════════════════════════════════════════════
+with aba4:
+    st.markdown("### 🔍 Ficha Individual dos Jogadores")
+
+    col_j1, col_j2 = st.columns([1, 2])
+
+    with col_j1:
+        pais_jogador = st.selectbox(
+            "🌍 Seleção:", sorted(df_raw["pais"].unique()), key="pais_jogador"
+        )
+        nomes_disp = sorted(
+            df_raw[df_raw["pais"] == pais_jogador]["nome"].tolist()
+        )
+        nome_jogador = st.selectbox("👤 Jogador:", nomes_disp, key="nome_jogador")
+
+    jogador = df_raw[df_raw["nome"] == nome_jogador].iloc[0]
+
+    with col_j1:
+        # Foto
+        if pd.notna(jogador.get("foto_url", None)) and str(jogador["foto_url"]).startswith("http"):
+            st.image(jogador["foto_url"], use_container_width=True)
+
+        st.markdown(f"""
+        <div style="background:#0d2137;border:1px solid #2e7d32;border-radius:10px;padding:14px;margin-top:10px">
+            <p style="color:#f9c93e;font-size:1.2rem;font-weight:700;margin:0">{jogador['nome']}</p>
+            <p style="color:#a5d6a7;margin:4px 0">🌍 {jogador['pais']}</p>
+            <p style="color:#a5d6a7;margin:4px 0">📌 {jogador['posicao']}</p>
+            <p style="color:#a5d6a7;margin:4px 0">🎂 {int(jogador['idade'])} anos</p>
+            <p style="color:#a5d6a7;margin:4px 0">🏟️ {jogador['clube']}</p>
+            <p style="color:#a5d6a7;margin:4px 0">🌍 {int(jogador['num_copas'])} Copa(s)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_j2:
+        # KPIs do jogador
+        kj1, kj2, kj3 = st.columns(3)
+        kj1.metric("⚽ Gols", int(jogador["gols_clube"]))
+        kj2.metric("🎯 Assistências", int(jogador["assistencias_clube"]))
+        kj3.metric("🏃 Partidas", int(jogador["partidas_clube"]))
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Radar individual
+        atributos_jog = {
+            "Ritmo":       jogador["ritmo"],
+            "Finalização": jogador["finalizacao"],
+            "Passe":       jogador["passe"],
+            "Drible":      jogador["drible"],
+            "Defesa":      jogador["defesa"],
+            "Físico":      jogador["fisico"],
+        }
+        # média da seleção para comparação
+        med_selecao = df_raw[df_raw["pais"] == jogador["pais"]][
+            ["ritmo", "finalizacao", "passe", "drible", "defesa", "fisico"]
+        ].mean()
+
+        fig_jog = go.Figure()
+        fig_jog.add_trace(go.Scatterpolar(
+            r=list(atributos_jog.values()),
+            theta=list(atributos_jog.keys()),
+            fill="toself",
+            name=nome_jogador,
+            line_color="#f9c93e",
+            fillcolor="#f9c93e",
+            opacity=0.5,
+        ))
+        fig_jog.add_trace(go.Scatterpolar(
+            r=med_selecao.tolist(),
+            theta=list(atributos_jog.keys()),
+            fill="toself",
+            name=f"Média {jogador['pais']}",
+            line_color=CORES_PAISES.get(jogador["pais"], "#2e7d32"),
+            fillcolor=CORES_PAISES.get(jogador["pais"], "#2e7d32"),
+            opacity=0.3,
+            line_dash="dot",
+        ))
+        fig_jog.update_layout(
+            polar=dict(
+                bgcolor="rgba(0,0,0,0)",
+                radialaxis=dict(
+                    visible=True, range=[0, 100],
+                    color="#a5d6a7", gridcolor="#2e7d32"
+                ),
+                angularaxis=dict(color="#f9c93e"),
+            ),
+            paper_bgcolor="rgba(0,0,0,0)",
+            title=f"Atributos: {nome_jogador} vs Média {jogador['pais']}",
+            title_font_color="#f9c93e",
+            height=380,
+            legend=dict(font=dict(color="#e0e0e0")),
+        )
+        st.plotly_chart(fig_jog, use_container_width=True)
+
+        # Barra de atributos
+        df_atrib = pd.DataFrame({
+            "Atributo": list(atributos_jog.keys()),
+            "Valor":    list(atributos_jog.values()),
+        })
+        fig_bar_jog = px.bar(
+            df_atrib,
+            x="Atributo",
+            y="Valor",
+            color="Valor",
+            color_continuous_scale=["#1b5e20", "#f9c93e"],
+            title="Distribuição de Atributos",
+            text="Valor",
+            range_y=[0, 100],
+        )
+        fig_bar_jog.update_traces(textposition="outside")
+        fig_bar_jog.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            coloraxis_showscale=False,
+            title_font_color="#f9c93e",
+            height=280,
+            xaxis_title="",
+        )
+        st.plotly_chart(fig_bar_jog, use_container_width=True)
