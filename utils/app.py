@@ -8,7 +8,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from carregar_dados import carregar_dados
+from carregar_dados.py import carregar_dados
 
 # ── Configuração da página ──────────────────────────────────────────────────
 st.set_page_config(
@@ -18,23 +18,22 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── CSS customizado ─────────────────────────────────────────────────────────
+# ── Parte de CSS ─────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* Fundo geral */
 .stApp { background-color: #0a1628; }
 
-/* Sidebar */
+/* menu da lateral */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #0d2137 0%, #0a3d1f 100%);
 }
 section[data-testid="stSidebar"] * { color: #e8f5e9 !important; }
 
-/* Títulos */
+/* Configuração do layout*/
 h1, h2, h3 { color: #f9c93e !important; }
 p, label, .stMarkdown { color: #e0e0e0 !important; }
 
-/* Cards de KPI */
+/* Configurando os KPIs */
 .kpi-card {
     background: linear-gradient(135deg, #0d2137 0%, #1a3a2e 100%);
     border: 1px solid #2e7d32;
@@ -82,7 +81,7 @@ p, label, .stMarkdown { color: #e0e0e0 !important; }
 }
 
 /* Foto do jogador */
-.player-card {
+/*.player-card {
     background: #0d2137;
     border: 1px solid #2e7d32;
     border-radius: 12px;
@@ -92,7 +91,7 @@ p, label, .stMarkdown { color: #e0e0e0 !important; }
 .player-card img { border-radius: 8px; max-width: 100%; }
 .player-name { font-size: 1.1rem; font-weight: 700; color: #f9c93e; margin-top: 8px; }
 .player-info { font-size: 0.85rem; color: #a5d6a7; }
-
+*/
 /* Separador */
 hr { border-color: #2e7d32 !important; opacity: 0.4; }
 </style>
