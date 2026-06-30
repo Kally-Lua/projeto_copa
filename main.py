@@ -1,7 +1,6 @@
 import streamlit as st
 
 from utils.carregar_dados import carregar_dados
-from utils.filtros import aplicar_filtros
 from utils.KPIs import mostrar_kpis
 
 from utils.graficos import graficos
@@ -157,6 +156,7 @@ for col, icon, val, label in kpis:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+
 # ══════════════════════════════════════════════════════════════════════════════
 # ABAS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -164,9 +164,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.divider()
 
 
-# FILTROS
 
-df = aplicar_filtros(df)
 
 # KPIs
 
