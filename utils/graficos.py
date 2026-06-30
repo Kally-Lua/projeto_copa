@@ -2,9 +2,27 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go  # NOVO: importamos go para o gráfico radar melhorado
 import pandas as pd
-
+st.set_page_config(
+    page_title="Copa do Mundo Dashboard",
+    page_icon="⚽",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 st.markdown("""
-            .kpi-card {
+.stApp { background-color: #0a1628; }
+
+/* menu da lateral */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0d2137 0%, #0a3d1f 100%);
+}
+section[data-testid="stSidebar"] * { color: #e8f5e9 !important; }
+
+/* Configuração do layout*/
+h1, h2, h3 { color: #f9c93e !important; }
+p, label, .stMarkdown { color: #e0e0e0 !important; }
+
+/* Configurando os KPIs */
+.kpi-card {
     background: linear-gradient(135deg, #0d2137 0%, #1a3a2e 100%);
     border: 1px solid #2e7d32;
     border-radius: 12px;
@@ -64,6 +82,54 @@ PALETA = [
     "#8e24aa", "#00838f", "#ef6c00", "#558b2f",
     "#ad1457", "#00695c", "#283593", "#6d4c41",
 ]
+st.sidebar.markdown("##  Copa do Mundo")
+st.sidebar.markdown("---")
+st.sidebar.markdown("###  Filtros")
+
+# Filtro 1 — Seleção
+paises_disp = sorted(df_raw["pais"].dropna().unique())
+pais_sel = st.sidebar.selectbox(
+    " Seleção",
+    options=["Todas"] + paises_disp,
+    index=0
+)
+
+# Filtro 2 — Posição
+posicoes_disp = sorted(df_raw["posicao"].dropna().unique())
+posicoes_sel = st.sidebar.multiselect(
+    " Posição",
+    options=posicoes_disp,
+    placeholder="Todas as posições"
+)
+
+# Filtro 3 — Faixa etária (bônus)
+idade_min, idade_max = int(df_raw["idade"].min()), int(df_raw["idade"].max())
+faixa_idade = st.sidebar.slider(
+    " Faixa etária",
+    min_value=idade_min,
+    max_value=idade_max,
+    value=(idade_min, idade_max)
+)
+
+st.sidebar.markdown("---")
+st.sidebar.info(" Dados: Copa do Mundo 2022\n\n IFNMG - BD2")
+
+# ── Aplica filtros ──────────────────────────────────────────────────────────
+df = df_raw.copy()
+if pais_sel != "Todas":
+    df = df[df["pais"] == pais_sel]
+if posicoes_sel:
+    df = df[df["posicao"].isin(posicoes_sel)]
+df = df[(df["idade"] >= faixa_idade[0]) & (df["idade"] <= faixa_idade[1])]
+
+# ── Cabeçalho ───────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="dashboard-header">
+    <h1> Copa do Mundo — Análise de Jogadores</h1>
+    <p>Explore estatísticas e desempenho das principais seleções do mundo</p>
+</div>
+""", unsafe_allow_html=True)
+
 # =============================================================================
 # O QUE É CADA COISA — GLOSSÁRIO RÁPIDO
 # =============================================================================
@@ -126,45 +192,55 @@ PALETA = [
 # =============================================================================
 
 
-def grafico_top_gols(df):
+ with col_b:
+        fig2 = px.histogram(
+            df,
+            x="idade",
+            nbins=12,
+            color="posicao",
+            title="Distribuição por Faixa Etária",
+            color_discrete_sequence=PALETA,
+            labels={"idade": "Idade", "count": "Jogadores", "posicao": "Posição"},
+        )
+        fig2.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_font_color="#f9c93e",
+            legend_title_text="Posição",
+            height=380,
+            bargap=0.05,
+        )
+        st.plotly_chart(fig2, use_container_width=True)
 
-    # Pega os 10 jogadores com mais gols, do maior para o menor
-    dados = (
-        df.sort_values("gols_clube", ascending=False)
-        .head(10)
+    # ── Gráfico 3: Jogadores por Seleção ────────────────────────────────────
+    st.markdown("---")
+    dados_pais = (
+        df.groupby("pais")
+        .size()
+        .reset_index(name="Jogadores")
+        .sort_values("Jogadores", ascending=False)
     )
+    cores_barras = [CORES_PAISES.get(p, "#f9c93e") for p in dados_pais["pais"]]
 
-    fig = px.bar(
-        dados,
-        x="gols_clube",
-        y="nome",
-        orientation="h",
-        title="🥇 Top 10 Artilheiros",
-        text="gols_clube",
-        color="pais",            # NOVO: cada seleção tem uma cor diferente
-        hover_data={             # NOVO: informações extras ao passar o mouse
-            "posicao": True,
-            "clube": True,
-            "pais": False        # pais já aparece na legenda, não precisa repetir
-        },
-        labels={
-            "gols_clube": "Gols no Clube",
-            "nome": "",
-            "pais": "Seleção"
-        }
+    fig3 = go.Figure(go.Bar(
+        x=dados_pais["pais"],
+        y=dados_pais["Jogadores"],
+        marker_color=cores_barras,
+        text=dados_pais["Jogadores"],
+        textposition="outside",
+    ))
+    fig3.update_layout(
+        title="Jogadores Convocados por Seleção",
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        title_font_color="#f9c93e",
+        yaxis_title="Nº de Jogadores",
+        xaxis_title="",
+        height=360,
     )
-
-    fig.update_layout(
-        yaxis=dict(categoryorder="total ascending"),  # ordena do menor para o maior
-        template="plotly_white",
-        height=420,
-        legend_title_text="Seleção"  # NOVO: título da legenda
-    )
-
-    fig.update_traces(textposition="outside")
-
-    st.plotly_chart(fig, use_container_width=True)
-
+    st.plotly_chart(fig3, use_container_width=True)
 
 # =============================================================================
 # GRÁFICO 3 — Top 10 Assistentes
