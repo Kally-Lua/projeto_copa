@@ -3,6 +3,7 @@ import streamlit as st
 from utils.carregar_dados import carregar_dados
 from utils.filtros import aplicar_filtros
 from utils.KPIs import mostrar_kpis
+
 from utils.graficos import utils.graficos
 
 # CONFIGURAÇÃO DA PÁGINA
