@@ -8,7 +8,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from carregar_dados.py import carregar_dados
+from carregar_dados import carregar_dados
 
 # ── Configuração da página ──────────────────────────────────────────────────
 st.set_page_config(
