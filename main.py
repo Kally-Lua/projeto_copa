@@ -3,16 +3,7 @@ import streamlit as st
 from utils.carregar_dados import carregar_dados
 from utils.filtros import aplicar_filtros
 from utils.KPIs import mostrar_kpis
-
-from utils.graficos import (
-    grafico_posicoes,
-    grafico_top_gols,
-    grafico_top_assistencias,
-    grafico_idades,
-    grafico_clubes,
-    grafico_media_gols_posicao,
-    grafico_desempenho_selecao,
-)
+from utils.graficos import utils.graficos
 
 # CONFIGURAÇÃO DA PÁGINA
 
